@@ -95,3 +95,33 @@ test('a closed month can be reopened, making it editable again', function () {
 test('reopening a month that is not closed returns 404', function () {
     $this->deleteJson('/api/months/2026/8/close')->assertStatus(404);
 });
+
+test('locking is based on the settlement month, not the raw date', function () {
+    // Dated in July but settled in August - closing July must not block it,
+    // and closing August must.
+    $expense = Expense::factory()->create([
+        'date' => '2026-07-04',
+        'settlement_year' => 2026,
+        'settlement_month' => 8,
+    ]);
+
+    $this->postJson('/api/months/2026/7/close')->assertOk();
+
+    $this->putJson("/api/expenses/{$expense->id}", [
+        'date' => '2026-07-04',
+        'settlement_year' => 2026,
+        'settlement_month' => 8,
+        'category_id' => $expense->category_id,
+        'amount' => 999,
+    ])->assertOk();
+
+    $this->postJson('/api/months/2026/8/close')->assertOk();
+
+    $this->putJson("/api/expenses/{$expense->id}", [
+        'date' => '2026-07-04',
+        'settlement_year' => 2026,
+        'settlement_month' => 8,
+        'category_id' => $expense->category_id,
+        'amount' => 1000,
+    ])->assertStatus(403);
+});

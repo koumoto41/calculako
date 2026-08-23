@@ -43,6 +43,22 @@ test('the month summary computes totals, category breakdown, and the balance for
     expect($breakdown['コンビニ']['total'])->toBe(500);
 });
 
+test('an expense settled in a different month than its date is aggregated under the settlement month', function () {
+    $category = Category::factory()->create();
+
+    // Purchased in July, but settled (billed) in August.
+    Expense::factory()->create([
+        'category_id' => $category->id,
+        'date' => '2026-07-28',
+        'settlement_year' => 2026,
+        'settlement_month' => 8,
+        'amount' => 4417,
+    ]);
+
+    expect($this->getJson('/api/months/2026/7/summary')->json('expense_total'))->toBe(0);
+    expect($this->getJson('/api/months/2026/8/summary')->json('expense_total'))->toBe(4417);
+});
+
 test('the summary reflects is_closed once a month is finalized', function () {
     $this->postJson('/api/months/2026/8/close')->assertOk();
 

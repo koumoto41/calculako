@@ -21,8 +21,8 @@ class ExpenseController extends Controller
         ]);
 
         return Expense::query()
-            ->whereYear('date', $validated['year'])
-            ->whereMonth('date', $validated['month'])
+            ->where('settlement_year', $validated['year'])
+            ->where('settlement_month', $validated['month'])
             ->orderBy('date')
             ->get();
     }
@@ -30,19 +30,19 @@ class ExpenseController extends Controller
     public function store(StoreExpenseRequest $request)
     {
         $validated = $request->validated();
-        $date = new \DateTimeImmutable($validated['date']);
-        $this->monthLock->assertOpen((int) $date->format('Y'), (int) $date->format('n'));
+        $validated += $this->resolveSettlementMonth($validated);
+        $this->monthLock->assertOpen($validated['settlement_year'], $validated['settlement_month']);
 
         return response()->json(Expense::create($validated), 201);
     }
 
     public function update(UpdateExpenseRequest $request, Expense $expense)
     {
-        $this->monthLock->assertOpen((int) $expense->date->format('Y'), (int) $expense->date->format('n'));
+        $this->monthLock->assertOpen($expense->settlement_year, $expense->settlement_month);
 
         $validated = $request->validated();
-        $newDate = new \DateTimeImmutable($validated['date']);
-        $this->monthLock->assertOpen((int) $newDate->format('Y'), (int) $newDate->format('n'));
+        $validated += $this->resolveSettlementMonth($validated);
+        $this->monthLock->assertOpen($validated['settlement_year'], $validated['settlement_month']);
 
         $expense->update($validated);
 
@@ -51,10 +51,33 @@ class ExpenseController extends Controller
 
     public function destroy(Expense $expense)
     {
-        $this->monthLock->assertOpen((int) $expense->date->format('Y'), (int) $expense->date->format('n'));
+        $this->monthLock->assertOpen($expense->settlement_year, $expense->settlement_month);
 
         $expense->delete();
 
         return response()->noContent();
+    }
+
+    /**
+     * The settlement month (which month this expense counts toward) defaults
+     * to the expense's own date - unless both fields are explicitly given,
+     * which is how CSV imports register a purchase under a different
+     * billing month than its actual transaction date.
+     *
+     * @param  array<string, mixed>  $validated
+     * @return array<string, int>
+     */
+    private function resolveSettlementMonth(array $validated): array
+    {
+        if (isset($validated['settlement_year'], $validated['settlement_month'])) {
+            return [];
+        }
+
+        $date = new \DateTimeImmutable($validated['date']);
+
+        return [
+            'settlement_year' => (int) $date->format('Y'),
+            'settlement_month' => (int) $date->format('n'),
+        ];
     }
 }

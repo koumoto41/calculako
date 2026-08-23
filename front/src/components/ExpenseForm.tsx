@@ -94,7 +94,6 @@ export function ExpenseForm({ categories, vendors, disabled, initial, onSubmit, 
           <input
             id="expense-content"
             type="text"
-            required
             disabled={disabled}
             value={input.content}
             onChange={(event) => setInput({ ...input, content: event.target.value })}

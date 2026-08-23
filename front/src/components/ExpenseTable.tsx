@@ -5,25 +5,48 @@ interface ExpenseTableProps {
   categories: Category[]
   vendors: Vendor[]
   disabled: boolean
+  checkedIds: Set<number>
+  onToggleChecked: (id: number) => void
+  onToggleCheckAll: () => void
   onEdit: (expense: Expense) => void
   onDelete: (id: number) => void
 }
 
-export function ExpenseTable({ expenses, categories, vendors, disabled, onEdit, onDelete }: ExpenseTableProps) {
+export function ExpenseTable({
+  expenses,
+  categories,
+  vendors,
+  disabled,
+  checkedIds,
+  onToggleChecked,
+  onToggleCheckAll,
+  onEdit,
+  onDelete,
+}: ExpenseTableProps) {
   const categoryName = (id: number) => categories.find((category) => category.id === id)?.name ?? ''
   const vendorName = (id: number | null) => vendors.find((vendor) => vendor.id === id)?.name ?? ''
+  const isSettlementDifferent = (expense: Expense) => {
+    const [year, month] = expense.date.split('-').map(Number)
+    return year !== expense.settlement_year || month !== expense.settlement_month
+  }
 
   if (expenses.length === 0) {
     return <p className="empty-state">この月の経費はまだ登録されていません。</p>
   }
 
   const total = expenses.reduce((sum, expense) => sum + expense.amount, 0)
+  const allChecked = expenses.every((expense) => checkedIds.has(expense.id))
 
   return (
     <div className="table-wrap">
       <table>
         <thead>
           <tr>
+            {!disabled && (
+              <th>
+                <input type="checkbox" aria-label="すべて選択" checked={allChecked} onChange={onToggleCheckAll} />
+              </th>
+            )}
             <th>日付</th>
             <th>費目</th>
             <th>購入先</th>
@@ -36,7 +59,24 @@ export function ExpenseTable({ expenses, categories, vendors, disabled, onEdit, 
         <tbody>
           {expenses.map((expense) => (
             <tr key={expense.id}>
-              <td>{expense.date}</td>
+              {!disabled && (
+                <td>
+                  <input
+                    type="checkbox"
+                    aria-label={`${expense.date} ${expense.content || expense.memo || ''}を選択`}
+                    checked={checkedIds.has(expense.id)}
+                    onChange={() => onToggleChecked(expense.id)}
+                  />
+                </td>
+              )}
+              <td>
+                {expense.date}
+                {isSettlementDifferent(expense) && (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    精算: {expense.settlement_year}年{expense.settlement_month}月
+                  </div>
+                )}
+              </td>
               <td>{categoryName(expense.category_id)}</td>
               <td>{vendorName(expense.vendor_id)}</td>
               <td>{expense.content}</td>
@@ -57,6 +97,7 @@ export function ExpenseTable({ expenses, categories, vendors, disabled, onEdit, 
         </tbody>
         <tfoot>
           <tr>
+            {!disabled && <td />}
             <td colSpan={4} style={{ textAlign: 'right', fontWeight: 700 }}>
               合計
             </td>

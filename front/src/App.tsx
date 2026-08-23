@@ -7,6 +7,7 @@ import { ExpenseEntryPage } from './pages/ExpenseEntryPage'
 import { CategoryVendorPage } from './pages/CategoryVendorPage'
 import { CardPage } from './pages/CardPage'
 import { AllowancePage } from './pages/AllowancePage'
+import { ImportPage } from './pages/ImportPage'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/expenses" element={<ExpenseEntryPage />} />
+          <Route path="/import" element={<ImportPage />} />
           <Route path="/categories" element={<CategoryVendorPage />} />
           <Route path="/cards" element={<CardPage />} />
           <Route path="/allowance" element={<AllowancePage />} />

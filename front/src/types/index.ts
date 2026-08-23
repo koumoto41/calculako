@@ -19,6 +19,8 @@ export interface Vendor {
 export interface Expense {
   id: number
   date: string
+  settlement_year: number
+  settlement_month: number
   category_id: number
   vendor_id: number | null
   content: string
@@ -28,6 +30,11 @@ export interface Expense {
 
 export interface ExpenseInput {
   date: string
+  // Which month this expense counts toward. Omit to default to the date's
+  // own year/month - only set explicitly when it differs (e.g. a card
+  // purchase billed the following month).
+  settlement_year?: number
+  settlement_month?: number
   category_id: number
   vendor_id: number | null
   content: string

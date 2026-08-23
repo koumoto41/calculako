@@ -22,10 +22,20 @@ test('an expense can be created', function () {
     ])->assertCreated()->assertJsonPath('amount', 1500)->assertJsonPath('date', '2026-08-15');
 });
 
+test('content is optional', function () {
+    $category = Category::factory()->create();
+
+    $this->postJson('/api/expenses', [
+        'date' => '2026-08-15',
+        'category_id' => $category->id,
+        'amount' => 500,
+    ])->assertCreated();
+});
+
 test('required fields are validated', function () {
     $this->postJson('/api/expenses', [])
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['date', 'category_id', 'content', 'amount']);
+        ->assertJsonValidationErrors(['date', 'category_id', 'amount']);
 });
 
 test('a vendor from a different category is rejected', function () {
@@ -52,6 +62,46 @@ test('expenses are listed for the requested month only', function () {
 
     $response->assertOk();
     expect($response->json())->toHaveCount(2);
+});
+
+test('the settlement month defaults to the date\'s own month when omitted', function () {
+    $category = Category::factory()->create();
+
+    $response = $this->postJson('/api/expenses', [
+        'date' => '2026-07-04',
+        'category_id' => $category->id,
+        'amount' => 4417,
+    ])->assertCreated();
+
+    $this->assertDatabaseHas('expenses', [
+        'id' => $response->json('id'),
+        'settlement_year' => 2026,
+        'settlement_month' => 7,
+    ]);
+});
+
+test('an explicit settlement month is honored even when it differs from the date', function () {
+    $category = Category::factory()->create();
+
+    // A card purchase made in July, billed (and budgeted) in August.
+    $response = $this->postJson('/api/expenses', [
+        'date' => '2026-07-04',
+        'settlement_year' => 2026,
+        'settlement_month' => 8,
+        'category_id' => $category->id,
+        'amount' => 4417,
+    ])->assertCreated();
+
+    $this->assertDatabaseHas('expenses', [
+        'id' => $response->json('id'),
+        'date' => '2026-07-04',
+        'settlement_year' => 2026,
+        'settlement_month' => 8,
+    ]);
+
+    // It shows up under August's list (the settlement month), not July.
+    expect($this->getJson('/api/expenses?year=2026&month=7')->json())->toHaveCount(0);
+    expect($this->getJson('/api/expenses?year=2026&month=8')->json())->toHaveCount(1);
 });
 
 test('an expense can be updated and deleted', function () {

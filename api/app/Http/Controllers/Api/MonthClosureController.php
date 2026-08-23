@@ -17,8 +17,8 @@ class MonthClosureController extends Controller
     public function summary(int $year, int $month)
     {
         $expenseTotal = (int) Expense::query()
-            ->whereYear('date', $year)
-            ->whereMonth('date', $month)
+            ->where('settlement_year', $year)
+            ->where('settlement_month', $month)
             ->sum('amount');
 
         $categoryBreakdown = Category::query()
@@ -26,8 +26,8 @@ class MonthClosureController extends Controller
             ->get()
             ->map(function (Category $category) use ($year, $month) {
                 $total = (int) $category->expenses()
-                    ->whereYear('date', $year)
-                    ->whereMonth('date', $month)
+                    ->where('settlement_year', $year)
+                    ->where('settlement_month', $month)
                     ->sum('amount');
 
                 return [

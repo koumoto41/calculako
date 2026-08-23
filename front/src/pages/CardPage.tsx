@@ -1,14 +1,7 @@
-import { isAxiosError } from 'axios'
 import { useEffect, useState, type FormEvent } from 'react'
 import * as cardsApi from '../api/cards'
+import { errorMessage } from '../utils/apiError'
 import type { Card } from '../types'
-
-function errorMessage(error: unknown, fallback: string): string {
-  if (isAxiosError(error) && typeof error.response?.data?.message === 'string') {
-    return error.response.data.message
-  }
-  return fallback
-}
 
 export function CardPage() {
   const [cards, setCards] = useState<Card[]>([])

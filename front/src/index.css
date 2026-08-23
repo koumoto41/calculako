@@ -311,6 +311,12 @@ button {
   margin-top: 4px;
 }
 
+.import-row {
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
 label {
   font-size: 0.78rem;
   font-weight: 600;
