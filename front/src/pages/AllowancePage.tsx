@@ -1,7 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { getAllowance, updateAllowance } from '../api/allowance'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 export function AllowancePage() {
+  useDocumentTitle('お小遣い登録')
   const [amount, setAmount] = useState(35000)
   const [savedMessage, setSavedMessage] = useState(false)
 

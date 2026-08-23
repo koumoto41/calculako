@@ -5,6 +5,7 @@ import { listVendors } from '../api/vendors'
 import { createExpense } from '../api/expenses'
 import { errorMessage } from '../utils/apiError'
 import { readCsvFile, type CsvImportRow } from '../utils/csv'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { Category, Vendor } from '../types'
 
 interface ImportDraft {
@@ -31,6 +32,7 @@ interface ImportPageProps {
 }
 
 export function ImportPage({ title, descriptionLabel, parseCsv }: ImportPageProps) {
+  useDocumentTitle(title)
   const [categories, setCategories] = useState<Category[]>([])
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [rows, setRows] = useState<CsvImportRow[]>([])

@@ -1,9 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import * as categoriesApi from '../api/categories'
 import * as vendorsApi from '../api/vendors'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { Category, Vendor } from '../types'
 
 export function CategoryVendorPage() {
+  useDocumentTitle('費目・購入先登録')
   const [categories, setCategories] = useState<Category[]>([])
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [newCategoryName, setNewCategoryName] = useState('')

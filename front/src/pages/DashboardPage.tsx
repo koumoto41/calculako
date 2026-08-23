@@ -3,9 +3,11 @@ import { MonthSelector } from '../components/MonthSelector'
 import { CategoryBreakdownTable } from '../components/CategoryBreakdownTable'
 import { useSelectedMonth } from '../hooks/useSelectedMonth'
 import { closeMonth, getMonthSummary, reopenMonth } from '../api/months'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { MonthSummary } from '../types'
 
 export function DashboardPage() {
+  useDocumentTitle('ダッシュボード')
   const selectedMonth = useSelectedMonth()
   const { year, month } = selectedMonth
   const [summary, setSummary] = useState<MonthSummary | null>(null)

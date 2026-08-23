@@ -12,9 +12,11 @@ import { listCardBills, saveCardBills } from '../api/cardBills'
 import { createExpense, deleteExpense, listExpenses, updateExpense } from '../api/expenses'
 import { closeMonth, getMonthSummary, reopenMonth } from '../api/months'
 import { errorMessage } from '../utils/apiError'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { Card, CardBill, Category, Expense, ExpenseInput, MonthSummary, Vendor } from '../types'
 
 export function ExpenseEntryPage() {
+  useDocumentTitle('経費入力')
   const selectedMonth = useSelectedMonth()
   const { year, month } = selectedMonth
 

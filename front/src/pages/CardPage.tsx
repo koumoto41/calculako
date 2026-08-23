@@ -1,9 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import * as cardsApi from '../api/cards'
 import { errorMessage } from '../utils/apiError'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { Card } from '../types'
 
 export function CardPage() {
+  useDocumentTitle('カード登録画面')
   const [cards, setCards] = useState<Card[]>([])
   const [newCardName, setNewCardName] = useState('')
   const [editingCard, setEditingCard] = useState<Card | null>(null)
