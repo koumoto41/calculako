@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
 import { MonthSelector } from '../components/MonthSelector'
 import { CategoryBreakdownTable } from '../components/CategoryBreakdownTable'
+import { CategoryBarChart } from '../components/CategoryBarChart'
+import { ExpenseTrendChart } from '../components/ExpenseTrendChart'
 import { useSelectedMonth } from '../hooks/useSelectedMonth'
-import { closeMonth, getMonthSummary, reopenMonth } from '../api/months'
+import { closeMonth, getExpenseTrend, getMonthSummary, reopenMonth, type MonthPoint } from '../api/months'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { MonthSummary } from '../types'
 
@@ -11,6 +13,7 @@ export function DashboardPage() {
   const selectedMonth = useSelectedMonth()
   const { year, month } = selectedMonth
   const [summary, setSummary] = useState<MonthSummary | null>(null)
+  const [trend, setTrend] = useState<MonthPoint[]>([])
   const [isUpdatingLock, setIsUpdatingLock] = useState(false)
 
   const loadSummary = useCallback(() => {
@@ -20,6 +23,10 @@ export function DashboardPage() {
   useEffect(() => {
     loadSummary()
   }, [loadSummary])
+
+  useEffect(() => {
+    getExpenseTrend(year, month).then(setTrend)
+  }, [year, month])
 
   async function handleClose() {
     if (!window.confirm(`${year}年${month}月を確定します。確定後は編集できなくなります。よろしいですか？`)) {
@@ -71,6 +78,10 @@ export function DashboardPage() {
               <div className="stat-label">カード請求合計</div>
               <div className="stat-value">{summary.card_bill_total.toLocaleString()}円</div>
             </div>
+            <div className="stat-card">
+              <div className="stat-label">残高</div>
+              <div className="stat-value">{summary.balance.toLocaleString()}円</div>
+            </div>
           </div>
 
           <div>
@@ -87,9 +98,24 @@ export function DashboardPage() {
 
           <div className="card">
             <div className="card-header">
-              <h2>費目別集計</h2>
+              <h2>費目別内訳</h2>
             </div>
-            <CategoryBreakdownTable breakdown={summary.category_breakdown} />
+            <CategoryBarChart breakdown={summary.category_breakdown} />
+            <details style={{ marginTop: 14 }}>
+              <summary style={{ cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                表で見る
+              </summary>
+              <div style={{ marginTop: 10 }}>
+                <CategoryBreakdownTable breakdown={summary.category_breakdown} />
+              </div>
+            </details>
+          </div>
+
+          <div className="card">
+            <div className="card-header">
+              <h2>経費推移（直近{trend.length || 6}か月）</h2>
+            </div>
+            <ExpenseTrendChart points={trend} />
           </div>
         </>
       )}

@@ -499,6 +499,74 @@ tfoot td {
   color: transparent;
 }
 
+/* ---------- Charts ---------- */
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bar-chart-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 84px;
+  align-items: center;
+  gap: 12px;
+}
+
+.bar-chart-label {
+  font-size: 0.85rem;
+  color: var(--text);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-chart-track {
+  background: var(--surface-muted);
+  border-radius: 4px;
+  height: 20px;
+  overflow: hidden;
+}
+
+.bar-chart-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 0 4px 4px 0;
+  min-width: 2px;
+}
+
+.bar-chart-value {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.trend-chart svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.trend-chart-tick {
+  font-size: 10px;
+  fill: var(--text-muted);
+}
+
+.trend-chart-endpoint {
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--text);
+}
+
+.trend-chart-status {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 /* ---------- Login ---------- */
 
 .login-shell {
