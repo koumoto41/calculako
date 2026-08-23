@@ -9,8 +9,8 @@ test('parses date, store name, and amount from a PayPay CSV export', () => {
   const rows = parsePayPayCsv(sampleCsv)
 
   expect(rows).toHaveLength(2)
-  expect(rows[0]).toMatchObject({ date: '2026-07-04', storeName: 'サンエー', amount: 4417, settlementDate: '2026-08-27' })
-  expect(rows[1]).toMatchObject({ date: '2026-07-04', storeName: 'ローソン', amount: 1806, settlementDate: '2026-08-27' })
+  expect(rows[0]).toMatchObject({ date: '2026-07-04', memo: 'サンエー', content: '', amount: 4417, settlementDate: '2026-08-27' })
+  expect(rows[1]).toMatchObject({ date: '2026-07-04', memo: 'ローソン', content: '', amount: 1806, settlementDate: '2026-08-27' })
 })
 
 test('skips blank lines and rows with an unparseable date', () => {
@@ -23,7 +23,7 @@ test('skips blank lines and rows with an unparseable date', () => {
   const rows = parsePayPayCsv(csv)
 
   expect(rows).toHaveLength(1)
-  expect(rows[0]).toMatchObject({ date: '2026-12-01', storeName: 'ローソン', amount: 500 })
+  expect(rows[0]).toMatchObject({ date: '2026-12-01', memo: 'ローソン', amount: 500 })
 })
 
 test('settlementDate is null when the CSV has no 当月お支払日 column', () => {

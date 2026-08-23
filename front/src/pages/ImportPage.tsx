@@ -4,7 +4,7 @@ import { listCategories } from '../api/categories'
 import { listVendors } from '../api/vendors'
 import { createExpense } from '../api/expenses'
 import { errorMessage } from '../utils/apiError'
-import { parsePayPayCsv, readCsvFile, type PayPayCsvRow } from '../utils/paypayCsv'
+import { readCsvFile, type CsvImportRow } from '../utils/csv'
 import type { Category, Vendor } from '../types'
 
 interface ImportDraft {
@@ -22,10 +22,18 @@ interface ImportResult {
   failures: string[]
 }
 
-export function ImportPage() {
+interface ImportPageProps {
+  title: string
+  // Column header for the select-step table's descriptive column, and the
+  // label used to build each checkbox's accessible name.
+  descriptionLabel: string
+  parseCsv: (text: string) => CsvImportRow[]
+}
+
+export function ImportPage({ title, descriptionLabel, parseCsv }: ImportPageProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [vendors, setVendors] = useState<Vendor[]>([])
-  const [rows, setRows] = useState<PayPayCsvRow[]>([])
+  const [rows, setRows] = useState<CsvImportRow[]>([])
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set())
   const [step, setStep] = useState<'select' | 'review'>('select')
   const [drafts, setDrafts] = useState<ImportDraft[]>([])
@@ -49,12 +57,12 @@ export function ImportPage() {
     setResult(null)
     try {
       const text = await readCsvFile(file)
-      const parsed = parsePayPayCsv(text)
+      const parsed = parseCsv(text)
       if (parsed.length === 0) {
         setFileError('CSVから有効なデータを読み込めませんでした。ファイル形式を確認してください。')
         return
       }
-      setRows(parsed)
+      setRows([...parsed].sort((a, b) => a.date.localeCompare(b.date)))
       setCheckedIds(new Set())
       setDrafts([])
       setStep('select')
@@ -64,6 +72,7 @@ export function ImportPage() {
   }
 
   const allChecked = rows.length > 0 && rows.every((row) => checkedIds.has(row.id))
+  const describeRow = (row: CsvImportRow) => row.content || row.memo
 
   function toggleChecked(id: string) {
     setCheckedIds((prev) => {
@@ -102,8 +111,8 @@ export function ImportPage() {
         id: row.id,
         date: row.date,
         amount: row.amount,
-        memo: row.storeName,
-        content: '',
+        memo: row.memo,
+        content: row.content,
         category_id: 0,
         vendor_id: null,
       })),
@@ -167,7 +176,7 @@ export function ImportPage() {
   return (
     <div className="page-stack">
       <div className="page-header">
-        <h1>PayPayカードCSVインポート</h1>
+        <h1>{title}</h1>
       </div>
 
       <div className="card">
@@ -210,7 +219,7 @@ export function ImportPage() {
                     <input type="checkbox" aria-label="すべて選択" checked={allChecked} onChange={toggleCheckAll} />
                   </th>
                   <th>日付</th>
-                  <th>利用店名・商品名</th>
+                  <th>{descriptionLabel}</th>
                   <th>金額</th>
                 </tr>
               </thead>
@@ -220,13 +229,13 @@ export function ImportPage() {
                     <td>
                       <input
                         type="checkbox"
-                        aria-label={`${row.date} ${row.storeName}を選択`}
+                        aria-label={`${row.date} ${describeRow(row)}を選択`}
                         checked={checkedIds.has(row.id)}
                         onChange={() => toggleChecked(row.id)}
                       />
                     </td>
                     <td>{row.date}</td>
-                    <td>{row.storeName}</td>
+                    <td>{describeRow(row)}</td>
                     <td>{row.amount.toLocaleString()}円</td>
                   </tr>
                 ))}

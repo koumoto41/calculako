@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext'
 const navItems = [
   { to: '/', label: 'ダッシュボード' },
   { to: '/expenses', label: '経費入力' },
-  { to: '/import', label: 'CSVインポート' },
+  { to: '/import/paypay', label: 'PayPay CSVインポート' },
+  { to: '/import/amazon', label: 'Amazon CSVインポート' },
   { to: '/categories', label: '費目・購入先' },
   { to: '/cards', label: 'カード' },
   { to: '/allowance', label: 'お小遣い' },
