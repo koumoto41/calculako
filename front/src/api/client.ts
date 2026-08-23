@@ -1,0 +1,12 @@
+import axios from 'axios'
+
+export const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+})
+
+export async function ensureCsrfCookie(): Promise<void> {
+  await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
+}

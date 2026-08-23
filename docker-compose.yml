@@ -1,0 +1,63 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-calculako}
+      MYSQL_USER: ${DB_USERNAME:-calculako}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - calculako-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_secret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    volumes:
+      - ./api:/var/www/html
+    networks:
+      - calculako-net
+    depends_on:
+      db:
+        condition: service_healthy
+
+  front:
+    build:
+      context: .
+      dockerfile: docker/front/Dockerfile
+    volumes:
+      - ./front:/app
+      - front_node_modules:/app/node_modules
+    networks:
+      - calculako-net
+    depends_on:
+      - api
+
+  apache:
+    build:
+      context: .
+      dockerfile: docker/apache/Dockerfile
+    volumes:
+      - ./api/public:/var/www/html/public:ro
+    ports:
+      - "8080:80"
+    networks:
+      - calculako-net
+    depends_on:
+      - api
+      - front
+
+networks:
+  calculako-net:
+    driver: bridge
+
+volumes:
+  db_data:
+  front_node_modules:
