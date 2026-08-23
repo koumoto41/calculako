@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { parseAmountInput } from '../utils/numeric'
 import type { Card, CardBill } from '../types'
 
 interface CardBillFormProps {
@@ -36,11 +37,11 @@ export function CardBillForm({ cards, bills, disabled, onSave }: CardBillFormPro
             <label htmlFor={`card-bill-${card.id}`}>{card.name}</label>
             <input
               id={`card-bill-${card.id}`}
-              type="number"
-              min={0}
+              type="text"
+              inputMode="numeric"
               disabled={disabled}
               value={amounts[card.id] ?? 0}
-              onChange={(event) => setAmounts({ ...amounts, [card.id]: Number(event.target.value) })}
+              onChange={(event) => setAmounts({ ...amounts, [card.id]: parseAmountInput(event.target.value) })}
             />
           </div>
         ))}

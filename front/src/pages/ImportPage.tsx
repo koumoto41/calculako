@@ -6,6 +6,7 @@ import { createExpense } from '../api/expenses'
 import { errorMessage } from '../utils/apiError'
 import { readCsvFile, type CsvImportRow } from '../utils/csv'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { parseAmountInput } from '../utils/numeric'
 import type { Category, Vendor } from '../types'
 
 interface ImportDraft {
@@ -339,11 +340,11 @@ export function ImportPage({ title, descriptionLabel, parseCsv }: ImportPageProp
                   <label htmlFor={`import-amount-${draft.id}`}>金額</label>
                   <input
                     id={`import-amount-${draft.id}`}
-                    type="number"
-                    min={1}
+                    type="text"
+                    inputMode="numeric"
                     required
                     value={draft.amount}
-                    onChange={(event) => updateDraft(draft.id, { amount: Number(event.target.value) })}
+                    onChange={(event) => updateDraft(draft.id, { amount: parseAmountInput(event.target.value) })}
                   />
                 </div>
                 <div className="form-group" style={{ flex: 2 }}>

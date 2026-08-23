@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { getAllowance, updateAllowance } from '../api/allowance'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { parseAmountInput } from '../utils/numeric'
 
 export function AllowancePage() {
   useDocumentTitle('お小遣い登録')
@@ -28,11 +29,11 @@ export function AllowancePage() {
           <label htmlFor="allowance-amount">お小遣い（円）</label>
           <input
             id="allowance-amount"
-            type="number"
-            min={0}
+            type="text"
+            inputMode="numeric"
             value={amount}
             onChange={(event) => {
-              setAmount(Number(event.target.value))
+              setAmount(parseAmountInput(event.target.value))
               setSavedMessage(false)
             }}
           />

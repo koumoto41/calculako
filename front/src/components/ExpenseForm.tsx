@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { parseAmountInput } from '../utils/numeric'
 import type { Category, ExpenseInput, Vendor } from '../types'
 
 interface ExpenseFormProps {
@@ -103,12 +104,12 @@ export function ExpenseForm({ categories, vendors, disabled, initial, onSubmit, 
           <label htmlFor="expense-amount">金額（税込み）</label>
           <input
             id="expense-amount"
-            type="number"
-            min={1}
+            type="text"
+            inputMode="numeric"
             required
             disabled={disabled}
             value={input.amount || ''}
-            onChange={(event) => setInput({ ...input, amount: Number(event.target.value) })}
+            onChange={(event) => setInput({ ...input, amount: parseAmountInput(event.target.value) })}
           />
         </div>
         <div className="form-group" style={{ flex: 2 }}>
