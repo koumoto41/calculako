@@ -6,6 +6,9 @@ services:
       MYSQL_USER: ${DB_USERNAME:-calculako}
       MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
+    ports:
+      # PhpStorm等のホスト側DBクライアントから接続するため（ホストの3306は他で使われがちなので別ポート）
+      - "127.0.0.1:${DB_FORWARD_PORT:-33060}:3306"
     volumes:
       - db_data:/var/lib/mysql
     networks:
